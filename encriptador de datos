@@ -1,0 +1,228 @@
+import re
+import pyfiglet
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+from rich.prompt import Prompt
+from rich.progress import track
+from rich.align import Align
+from rich import box
+from time import sleep
+
+# ==========================
+# CONFIGURACIÓN
+# ==========================
+
+console = Console()
+
+encriptados = 0
+desencriptados = 0
+
+En = {
+    'q': '~', 'w': '`', 'e': '|', 'r': '•', 't': '√',
+    'y': 'π', 'u': '÷', 'i': '×', 'o': '§', 'p': '∆',
+    'a': '£', 's': '¥', 'd': '$', 'f': '¢', 'g': '^',
+    'h': '°', 'j': '=', 'k': '{', 'l': '}',
+    'z': '%', 'x': '©', 'c': '®', 'v': '™', 'b': '✓',
+    'n': '[', 'm': ']',
+    ',': '<',
+    '.': '>'
+}
+
+Des = {valor: clave for clave, valor in En.items()}
+
+patronPermitido = r'^[a-zA-Z\s,\.]*$'
+
+# ==========================
+# INTERFAZ
+# ==========================
+
+def logo():
+    texto = pyfiglet.figlet_format("ChamaCript", font="small")
+
+    console.clear()
+
+    panel = Panel(
+        Align.center(
+            f"[bold bright_green]{texto}[/bold bright_green]\n"
+            "[bold cyan]🔐 Sistema de Encriptación Chamaco 🔐[/bold cyan]\n"
+            "[white]By Laggg & Zenithar_ss[/white]"
+        ),
+        border_style="bright_green",
+        title="[bold yellow]v2.0[/bold yellow]"
+    )
+
+    console.print(panel)
+
+
+def animacion_carga(texto):
+    for _ in track(
+        range(25),
+        description=f"[bright_green]{texto}..."
+    ):
+        sleep(0.03)
+
+
+def mostrar_estadisticas():
+    tabla = Table(
+        title="📊 Estadísticas",
+        box=box.ROUNDED,
+        border_style="bright_blue"
+    )
+
+    tabla.add_column("Acción", style="cyan")
+    tabla.add_column("Cantidad", justify="center", style="green")
+
+    tabla.add_row("Textos Encriptados", str(encriptados))
+    tabla.add_row("Textos Desencriptados", str(desencriptados))
+
+    console.print(tabla)
+
+
+def menu_principal():
+    tabla = Table(
+        title="MENÚ PRINCIPAL",
+        box=box.DOUBLE_EDGE,
+        border_style="bright_green"
+    )
+
+    tabla.add_column("Opción", justify="center", style="yellow")
+    tabla.add_column("Acción", style="white")
+
+    tabla.add_row("1", "🔓 Desencriptar")
+    tabla.add_row("2", "🔒 Encriptar")
+    tabla.add_row("3", "📊 Ver estadísticas")
+    tabla.add_row("4", "❌ Salir")
+
+    console.print(tabla)
+
+# ==========================
+# ENCRIPTAR
+# ==========================
+
+def en():
+    global encriptados
+
+    while True:
+
+        console.print(
+            Panel(
+                "[bold green]Modo Encriptación[/bold green]",
+                border_style="green"
+            )
+        )
+
+        texto = Prompt.ask(
+            "\n[cyan]Ingrese el texto (0 para volver)[/cyan]"
+        )
+
+        if texto == "0":
+            return
+
+        if not re.match(patronPermitido, texto):
+            console.print(
+                "\n[bold red]❌ Caracteres no válidos[/bold red]"
+            )
+            continue
+
+        animacion_carga("Encriptando")
+
+        resultado = ""
+
+        for ch in texto.lower():
+            resultado += En.get(ch, ch)
+
+        encriptados += 1
+
+        console.print(
+            Panel(
+                resultado,
+                title="✅ Resultado",
+                border_style="bright_green"
+            )
+        )
+
+# ==========================
+# DESENCRIPTAR
+# ==========================
+
+def des():
+    global desencriptados
+
+    while True:
+
+        console.print(
+            Panel(
+                "[bold yellow]Modo Desencriptación[/bold yellow]",
+                border_style="yellow"
+            )
+        )
+
+        texto = Prompt.ask(
+            "\n[cyan]Ingrese el texto (0 para volver)[/cyan]"
+        )
+
+        if texto == "0":
+            return
+
+        animacion_carga("Desencriptando")
+
+        resultado = ""
+
+        for ch in texto:
+            resultado += Des.get(ch, ch)
+
+        desencriptados += 1
+
+        console.print(
+            Panel(
+                resultado,
+                title="✅ Resultado",
+                border_style="bright_yellow"
+            )
+        )
+
+# ==========================
+# MAIN
+# ==========================
+
+def menu():
+
+    while True:
+
+        logo()
+        menu_principal()
+
+        opcion = Prompt.ask(
+            "\n[bold cyan]Seleccione una opción[/bold cyan]",
+            choices=["1", "2", "3", "4"]
+        )
+
+        match opcion:
+
+            case "1":
+                des()
+
+            case "2":
+                en()
+
+            case "3":
+                mostrar_estadisticas()
+                input("\nPresione ENTER para continuar...")
+
+            case "4":
+
+                animacion_carga("Cerrando sistema")
+
+                console.print(
+                    Panel(
+                        "[bold red]Gracias por usar ChamaCript[/bold red]\n"
+                        "[white]Hasta la próxima 👋[/white]",
+                        border_style="red"
+                    )
+                )
+
+                break
+
+
+menu()
